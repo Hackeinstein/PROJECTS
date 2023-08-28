@@ -9,8 +9,10 @@ class Snake:
     def __init__(self):
         self.cords = [0, -20, -40]
         self.full_seg = []
+        self.create_snake()
         
         # create snakes
+    def create_snake(self):
         for position in STARTING_POSITIONS:
             self.add_segments(position)
         self.head=self.full_seg[0]
@@ -49,3 +51,9 @@ class Snake:
 
     def extend (self):
         self.add_segments(self.full_seg[-1].position())
+
+    def reset (self):
+        for segs in self.seg:
+            segs.goto(1000,1000)
+        self.seg.clear()
+        self.create_snake()

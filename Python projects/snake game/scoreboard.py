@@ -13,7 +13,7 @@ class Scoreboard (Turtle):
         self.penup()
         self.goto(0, 270)
         self.write(f"Score: {self.score} High Score: {self.high_score}",
-                   move="False", align=ALIGN, font=FONT)
+                   move=False, align=ALIGN, font=FONT)
         with open("data.txt") as data:
            self.high_score = int(data.read())
 

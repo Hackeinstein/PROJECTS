@@ -31,7 +31,7 @@ class CafeForm(FlaskForm):
     coffee_rate = SelectField("Coffee Rating",
                               choices=[('☕️', '☕️'), ('☕️☕️', '☕️☕️'), ('☕️☕️☕️', '☕️☕️☕️'), ('☕️☕️☕️☕️', '☕️☕️☕️☕️')],
                               validators=[DataRequired()])
-    wifi_rate = SelectField("WIFI Strenght rating",
+    wifi_rate = SelectField("WIFI Strength rating",
                             choices=[('✘', '✘'), ('💪', '💪'), ('💪💪', '💪💪'), ('💪💪💪', '💪💪💪'), ('💪💪💪💪', '💪💪💪💪')],
                             validators=[DataRequired()])
     power_rate = SelectField("Power Socket Availability",

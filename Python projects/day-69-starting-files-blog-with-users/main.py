@@ -10,33 +10,20 @@ from sqlalchemy.orm import relationship
 # Import your forms from the forms.py
 from forms import *
 
-'''
-Make sure the required packages are installed: 
-Open the Terminal in PyCharm (bottom left). 
-
-On Windows type:
-python -m pip install -r requirements.txt
-
-On MacOS type:
-pip3 install -r requirements.txt
-
-This will install the packages from the requirements.txt for this project.
-'''
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 ckeditor = CKEditor(app)
 Bootstrap5(app)
 
 # TODO: Configure Flask-Login
-
+login_manager=LoginManager()
+login_manager.init_app(app)
 
 # CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
 db = SQLAlchemy()
 db.init_app(app)
-login_manager=LoginManager()
-login_manager.init_app(app)
+
 
 # CONFIGURE TABLES
 class BlogPost(db.Model):
@@ -66,6 +53,14 @@ with app.app_context():
 def load_user(user_id):
     return db.get_or_404(User,user_id)
 
+def admin_user(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.id != 1:
+            return abort(403)
+        else:
+            return f(*args, **kwargs)
+    return decorated_function
 
 # TODO: Use Werkzeug to hash the user's password when creating a new user.
 @app.route('/register', methods=['GET', 'POST'])
@@ -117,6 +112,7 @@ def logout():
 
 @app.route('/')
 def get_all_posts():
+    print(type(current_user.get_id()))
     result = db.session.execute(db.select(BlogPost))
     posts = result.scalars().all()
     return render_template("index.html", all_posts=posts)
@@ -131,6 +127,7 @@ def show_post(post_id):
 
 # TODO: Use a decorator so only an admin user can create a new post
 @app.route("/new-post", methods=["GET", "POST"])
+@admin_user
 def add_new_post():
     form = CreatePostForm()
     if form.validate_on_submit():
@@ -150,6 +147,7 @@ def add_new_post():
 
 # TODO: Use a decorator so only an admin user can edit a post
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
+@admin_user
 def edit_post(post_id):
     post = db.get_or_404(BlogPost, post_id)
     edit_form = CreatePostForm(
@@ -172,6 +170,7 @@ def edit_post(post_id):
 
 # TODO: Use a decorator so only an admin user can delete a post
 @app.route("/delete/<int:post_id>")
+@admin_user
 def delete_post(post_id):
     post_to_delete = db.get_or_404(BlogPost, post_id)
     db.session.delete(post_to_delete)

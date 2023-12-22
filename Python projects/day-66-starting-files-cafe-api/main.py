@@ -89,10 +89,9 @@ def search_cafe():
         )
 
 
-
-@app.route("/add", methods=["GET","POST"])
+@app.route("/add", methods=["GET", "POST"])
 def add_cafe():
-    new_cafe=Cafe(
+    new_cafe = Cafe(
         name=request.form.get("name"),
         map_url=request.form.get("map_url"),
         img_url=request.form.get("img_url"),
@@ -111,14 +110,34 @@ def add_cafe():
     return jsonify(response={"Success": "Successfully added the new cafe. "})
 
 
+@app.route("/update-price/<cafe_id>", methods=['PATCH'])
+def update_price(cafe_id):
+    try:
+        result = db.get_or_404(Cafe, cafe_id)
+        new_price = request.args.get("new_price")
+        result.coffee_price = new_price
+        db.session.commit()
+        return jsonify(response={"Success": "Successfully updated the price. "})
+    except Exception as ex:
+        print(ex)
+        return jsonify(error={"Not Found": "Cafe with id not found. "}), 404
 
-# HTTP GET - Read Record
 
-# HTTP POST - Create Record
-
-# HTTP PUT/PATCH - Update Record
-
-# HTTP DELETE - Delete Record
+@app.route("/report-closed/<cafe_id>", methods=['DELETE'])
+def report_closed(cafe_id):
+    if request.args.get("api-key") != "TopSecretAPIKey":
+        return jsonify(error={"API ERROR": "Invalid api key"}), 403
+    else:
+        try:
+            result = db.get_or_404(Cafe, cafe_id)
+            db.session.delete(result)
+            db.session.commit()
+            return jsonify(response={"Done": "Cafe Successfully deleted"})
+        except Exception as ex:
+            print(ex)
+            return jsonify(error={
+                "Not found": "Cafe not found"
+            })
 
 
 if __name__ == '__main__':
